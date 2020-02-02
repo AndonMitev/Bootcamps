@@ -15,6 +15,9 @@ const bootcamps = require('./routes/bootcamps');
 
 const app = express();
 
+// Body parser
+app.use(express.json());
+
 const PORT = process.env.PORT || 5000;
 
 const BOOTCAMP_URL = '/api/v1/bootcamps';
