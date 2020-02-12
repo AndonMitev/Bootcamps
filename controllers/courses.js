@@ -90,16 +90,18 @@ exports.deleteCourse = asyncHandler(async (req, res, next) => {
 // @route     PUT /api/v1/courses/:id
 // @access    Public
 exports.updateCourse = asyncHandler(async (req, res, next) => {
-  const course = await Course.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true
-  });
+  let course = await Course.findById(req.params.id);
 
   if (!course) {
     return next(
       new ErrorResponse(`Course with id: ${req.params.id} not found`, 404)
     );
   }
+
+  course = await Course.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true
+  });
 
   res.status(200).json({
     success: true,
