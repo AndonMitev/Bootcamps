@@ -4,7 +4,6 @@ const asyncHandler = require('../middleware/async');
 const geocoder = require('../utils/geocoder');
 
 const EARTH_RADIUS_IN_MILES = 3963;
-const REMOVE_SELECT_FIELDS = ['select'];
 
 // @desc      Get all bootcamps
 // @route     GET /api/v1/bootcamps
@@ -19,7 +18,7 @@ exports.getBootcamps = asyncHandler(async (req, res, next) => {
 
   queryStr = queryStr.replace(/\b(lt|lte|gt|gte|in)\b/, match => `$${match}`);
 
-  let query = Bootcamp.find(JSON.parse(queryStr));
+  let query = Bootcamp.find(JSON.parse(queryStr)).populate('courses');
 
   if (req.query.select) {
     const fields = req.query.select.split(',').join(' ');
@@ -58,14 +57,12 @@ exports.getBootcamps = asyncHandler(async (req, res, next) => {
     };
   }
 
-  res
-    .status(200)
-    .json({
-      success: true,
-      count: bootcamps.length,
-      data: bootcamps,
-      pagination
-    });
+  res.status(200).json({
+    success: true,
+    count: bootcamps.length,
+    data: bootcamps,
+    pagination
+  });
 });
 
 // @desc      Get single bootcamp
@@ -116,7 +113,7 @@ exports.updateBootcamp = asyncHandler(async (req, res, next) => {
 // @route     DELETE /api/v1/bootcamps/:id
 // @access    Private
 exports.deleteBootcamp = asyncHandler(async (req, res, next) => {
-  const bootcamp = await Bootcamp.findByIdAndDelete(req.params.id);
+  const bootcamp = await Bootcamp.findById(req.params.id);
 
   if (!bootcamp) {
     return next(
@@ -124,6 +121,8 @@ exports.deleteBootcamp = asyncHandler(async (req, res, next) => {
       404
     );
   }
+
+  bootcamp.remove();
 
   res.status(200).json({ success: true });
 });
